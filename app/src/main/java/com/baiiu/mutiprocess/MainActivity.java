@@ -21,13 +21,12 @@ public class MainActivity extends AppCompatActivity {
         UserManager.sId += 1;
         UserManager.INSTANCE.age += 1;
         LogUtil.d(UserManager.INSTANCE.age + ", " + UserManager.sId);
-
-        Intent intent = new Intent(this, BookManagerService.class);
-        bindService(intent, connection, Context.BIND_AUTO_CREATE);
     }
 
     private ServiceConnection connection = new ServiceConnection() {
         @Override public void onServiceConnected(ComponentName name, IBinder service) {
+            LogUtil.d("onServiceConnected:" + name);
+
             IBookManager iBookManager = IBookManager.Stub.asInterface(service);
             try {
                 iBookManager.addBook(new Book(4, "book4"));
@@ -41,7 +40,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         @Override public void onServiceDisconnected(ComponentName name) {
-
+            LogUtil.d("onServiceDisconnected:" + name);
         }
     };
 
@@ -53,6 +52,14 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void onClick(View view) {
-        startActivity(new Intent(this, SecondActivity.class));
+        switch (view.getId()) {
+            case R.id.tv_bind:
+                Intent intent = new Intent(this, BookManagerService.class);
+                bindService(intent, connection, Context.BIND_AUTO_CREATE);
+                break;
+            case R.id.tv_second:
+                startActivity(new Intent(this, SecondActivity.class));
+                break;
+        }
     }
 }
