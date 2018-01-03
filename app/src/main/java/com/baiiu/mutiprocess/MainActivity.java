@@ -11,6 +11,8 @@ import android.os.RemoteException;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import com.baiiu.library.LogUtil;
+import com.baiiu.mutiprocess.custom.IBookManager;
+import com.baiiu.mutiprocess.custom.BookManagerImpl;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
@@ -29,7 +31,7 @@ public class MainActivity extends AppCompatActivity {
             LogUtil.d("onServiceConnected:" + name); // BinderProxy，只有这个才有跨进程的能力
             LogUtil.d(service);
 
-            IBookManager iBookManager = IBookManager.Stub.asInterface(service);
+            IBookManager iBookManager = BookManagerImpl.asInterface(service);
             try {
                 iBookManager.addBook(new Book(4, "book4"));
                 LogUtil.d("onServiceConnected: " + Process.myPid());

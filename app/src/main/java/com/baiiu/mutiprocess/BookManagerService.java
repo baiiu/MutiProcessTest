@@ -8,6 +8,7 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.support.annotation.Nullable;
 import com.baiiu.library.LogUtil;
+import com.baiiu.mutiprocess.custom.BookManagerImpl;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,31 +18,27 @@ import java.util.List;
  * description:
  */
 public class BookManagerService extends Service {
-    private List<Book> list;
+    private final List<Book> list = new ArrayList<>();
 
-    private Binder mBinder = new IBookManager.Stub() {
+    private Binder mBinder = new BookManagerImpl() {
 
         @Override public List<Book> getBookList() throws RemoteException {
             LogUtil.d(Binder.getCallingPid() + "," + Process.myPid());
-            return list;
+            synchronized (list) {
+                return list;
+            }
         }
 
         @Override public void addBook(Book book) throws RemoteException {
-            if (list == null) {
-                return;
+            synchronized (list) {
+                list.add(book);
             }
-
-            list.add(book);
         }
     };
 
 
     @Override public void onCreate() {
         super.onCreate();
-        if (list == null) {
-            list = new ArrayList<>();
-        }
-
         list.add(new Book(1, "book1"));
         list.add(new Book(2, "book2"));
         list.add(new Book(3, "book3"));
