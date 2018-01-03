@@ -4,8 +4,10 @@ import android.app.Service;
 import android.content.Intent;
 import android.os.Binder;
 import android.os.IBinder;
+import android.os.Process;
 import android.os.RemoteException;
 import android.support.annotation.Nullable;
+import com.baiiu.library.LogUtil;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,6 +22,7 @@ public class BookManagerService extends Service {
     private Binder mBinder = new IBookManager.Stub() {
 
         @Override public List<Book> getBookList() throws RemoteException {
+            LogUtil.d(Binder.getCallingPid() + "," + Process.myPid());
             return list;
         }
 
