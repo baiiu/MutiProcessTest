@@ -18,12 +18,14 @@ import java.util.List;
  * description:
  */
 public class BookManagerService extends Service {
+    public static final String TAG_BINDER = "binder";
+
     private final List<Book> list = new ArrayList<>();
 
     private Binder mBinder = new BookManagerImpl() {
 
         @Override public List<Book> getBookList() throws RemoteException {
-            LogUtil.d(Binder.getCallingPid() + "," + Process.myPid());
+            LogUtil.d(TAG_BINDER, Binder.getCallingPid() + "," + Process.myPid());
             synchronized (list) {
                 return list;
             }
