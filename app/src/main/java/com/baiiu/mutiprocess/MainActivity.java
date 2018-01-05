@@ -18,6 +18,21 @@ import java.util.List;
 import static com.baiiu.mutiprocess.BookManagerService.TAG_BINDER;
 
 public class MainActivity extends AppCompatActivity {
+    private IBookManager mRemoteBookManager;
+
+    private IBinder.DeathRecipient mDeathRecipient = new IBinder.DeathRecipient() {
+        @Override public void binderDied() {
+            if (mRemoteBookManager == null) return;
+
+            mRemoteBookManager.asBinder()
+                    .unlinkToDeath(mDeathRecipient, 0);
+            mRemoteBookManager = null;
+
+            Intent intent = new Intent(MainActivity.this, BookManagerService.class);
+            bindService(intent, connection, Context.BIND_AUTO_CREATE);
+        }
+    };
+
 
     @Override protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -33,11 +48,13 @@ public class MainActivity extends AppCompatActivity {
             LogUtil.d("onServiceConnected:" + name); // BinderProxy，只有这个才有跨进程的能力
             LogUtil.d(TAG_BINDER, service);
 
-            IBookManager iBookManager = BookManagerImpl.asInterface(service);
+            mRemoteBookManager = BookManagerImpl.asInterface(service);
             try {
-                iBookManager.addBook(new Book(4, "book4"));
+                mRemoteBookManager.asBinder()
+                        .linkToDeath(mDeathRecipient, 0);
+                mRemoteBookManager.addBook(new Book(4, "book4"));
                 LogUtil.d(TAG_BINDER, Process.myPid());
-                List<Book> bookList = iBookManager.getBookList();
+                List<Book> bookList = mRemoteBookManager.getBookList();
 
 
                 LogUtil.d(bookList);
@@ -49,6 +66,7 @@ public class MainActivity extends AppCompatActivity {
 
         @Override public void onServiceDisconnected(ComponentName name) {
             LogUtil.d("onServiceDisconnected:" + name);
+            mRemoteBookManager = null;
         }
     };
 
